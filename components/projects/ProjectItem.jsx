@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { CiRead } from "react-icons/ci";
 
 const ProjectItem = ({ project }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,9 +25,8 @@ const ProjectItem = ({ project }) => {
 
   useEffect(() => {
     AOS.init({ duration: 800 });
+    window.scrollTo(0, 0);
   }, []);
-
-  const profilePhotoUrl = "https://i.pravatar.cc/150?u=a042581f4e29026024d";
 
   return (
     <Card
@@ -69,7 +69,7 @@ const ProjectItem = ({ project }) => {
           <Avatar
             as={Link}
             href={`/profile/${project._id}`}
-            src={profilePhotoUrl}
+            src={project?.user?.profilePhoto?.url || ""}
           />
         )}
       </CardBody>
@@ -77,12 +77,12 @@ const ProjectItem = ({ project }) => {
       <CardFooter className="flex flex-col justify-between gap-3">
         {isLoading ? (
           <Skeleton className="rounded-lg">
-            <p className="mt-2 text-sm text-right flex items-start justify-start">
+            <p className="mt-2 text-sm text-right flex items-start justify-start ">
               {project.description}
             </p>
           </Skeleton>
         ) : (
-          <p className="mt-2 text-sm text-right flex items-start justify-start">
+          <p className="mt-2 text-sm text-right flex items-start justify-start text-gray-300">
             {project.description}
           </p>
         )}
@@ -107,7 +107,7 @@ const ProjectItem = ({ project }) => {
               <div className="rounded-lg bg-gray-300" />
             </Skeleton>
           ) : (
-            <span>التقييم: {project.likes.length} صوت</span>
+            <span>التقييم: {project.likes.length} اعجاب</span>
           )}
         </div>
 
@@ -122,6 +122,7 @@ const ProjectItem = ({ project }) => {
           variant="flat"
           color="primary"
           fullWidth
+          endContent={<CiRead size={22} />}
         >
           عرض التفاصيل
         </Button>

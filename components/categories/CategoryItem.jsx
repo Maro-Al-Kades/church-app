@@ -4,37 +4,33 @@ import { Card, CardBody } from "@nextui-org/card";
 import Link from "next/link";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Spinner } from "@nextui-org/react";
+import { fetchAllCategories } from "@/redux/api/categoryApiCall";
 
 const CategoryItem = () => {
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { isLoading, error } = useSelector((state) => state.project);
+
+  const { categories } = useSelector((state) => state.category);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8000/api/categories/"
-        );
-        setCategories(response.data.categories);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching categories:", error.message);
-        setIsLoading(false);
-        // Consider adding user-friendly error handling here
-      }
-    };
-
-    fetchData();
+    dispatch(fetchAllCategories());
     AOS.init({ duration: 800 });
-  }, []); // Empty dependency array for initial render only
-
+  }, [dispatch]);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 w-full">
       {isLoading ? (
-        <p>Loading...</p> // Loading message
-      ) : (
+        <div className="text-primary text-3xl font-bold flex items-center justify-center w-full">
+          <Spinner
+            label="جاري تحميل الاقسام الخاصة بالكنيسة..."
+            color="primary"
+          />
+        </div>
+      ) : error ? (
+        <p>{error}</p>
+      ) : Array.isArray(categories) && categories.length > 0 ? (
         categories.map((category) => (
           <Card
             key={category._id}
@@ -54,6 +50,8 @@ const CategoryItem = () => {
             </CardBody>
           </Card>
         ))
+      ) : (
+        <p>لا يوجد أقسام حالياً</p>
       )}
     </div>
   );

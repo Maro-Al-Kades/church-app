@@ -1,4 +1,4 @@
-// redux/slices/authSlice.js
+// redux/slices/profileSlice.js
 
 import { createSlice } from "@reduxjs/toolkit";
 
@@ -18,7 +18,7 @@ const profileSlice = createSlice({
       state.profile.profilePhoto = action.payload;
     },
 
-    updateProfileState(state, action) {
+    updateProfile(state, action) {
       state.profile = action.payload;
     },
   },

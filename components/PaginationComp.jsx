@@ -6,8 +6,12 @@ import React, { useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-const PaginationComp = () => {
-  const [currentPage, setCurrentPage] = React.useState(1);
+const PaginationComp = ({ pages, currentPage, setCurrentPage }) => {
+  const generatedPages = [];
+  for (let i = 1; i <= pages; i++) {
+    // عدلنا هنا الشرط
+    generatedPages.push(i);
+  }
 
   useEffect(() => {
     AOS.init({ duration: 800 });
@@ -21,7 +25,7 @@ const PaginationComp = () => {
       data-aos-once="true"
     >
       <Pagination
-        total={10}
+        total={pages}
         color="primary"
         page={currentPage}
         onChange={setCurrentPage}
@@ -39,8 +43,8 @@ const PaginationComp = () => {
           size="sm"
           variant="flat"
           color="primary"
-          onPress={() =>
-            setCurrentPage((prev) => (prev < 10 ? prev + 1 : prev))
+          onPress={
+            () => setCurrentPage((prev) => (prev < pages ? prev + 1 : prev)) // عدلنا هنا الشرط
           }
         >
           التالي

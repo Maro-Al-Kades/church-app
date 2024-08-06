@@ -12,6 +12,8 @@ import { Navbar } from "@/components/shared/Header/navbar";
 import { ToastContainer } from "react-toastify";
 import { siteConfig } from "../config/site";
 import Glow from "@/components/Glow";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export const fontSans = Tajawal({
   subsets: ["arabic"],
@@ -55,7 +57,7 @@ export default function RootLayout({ children }) {
               <Glow className="-top-72 right-[90%]" />
               <main className="container mx-auto max-w-screen-2xl pt-16 px-6 flex-grow">
                 <NextTopLoader color="#ffdea6" />
-                <ToastContainer />
+                <ToastContainer theme="dark" position="top-right" />
                 {children}
               </main>
               <footer className="w-full flex items-center justify-center py-3">

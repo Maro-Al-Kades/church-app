@@ -1,30 +1,46 @@
 "use client";
 
-import { categories } from "@/constants";
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { createProject, fetchCategories } from "@/redux/api/projectApiCall";
+import { Spinner } from "@nextui-org/react";
+import { fetchAllCategories } from "@/redux/api/categoryApiCall";
 
 const CreateProject = () => {
+  const dispatch = useDispatch();
+  const { isProjectCreated } = useSelector((state) => state.project);
+  const { categories } = useSelector((state) => state.category);
+  const { user } = useSelector((state) => state.auth);
+
   const router = useRouter();
-  const user = useSelector((state) => state.auth.user);
+  const [loading, setIsLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [file, setFile] = useState(null);
+  const [headerText, setHeaderText] = useState("إنشاء مشروع جديد");
 
   useEffect(() => {
     if (!user) {
       router.push("/");
+    } else {
+      dispatch(fetchAllCategories());
     }
-  }, [user]);
+  }, [user, dispatch, router]);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [file, setFile] = (useState < File) | (null > null);
+  useEffect(() => {
+    if (isProjectCreated) {
+      setHeaderText("جاري التحويل الي صفحة المشاريع...");
+      router.push("/projects");
+    }
+  }, [isProjectCreated, router]);
 
   //~ Form Submit Handler
   const formSubmitHandler = (e) => {
@@ -42,16 +58,11 @@ const CreateProject = () => {
     formData.append("image", file);
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("category", category);
+    formData.append("category", category); // Ensure this is the category ID
 
-    //` TODO: SEND FORM DATA TO SERVER
-
-    console.log({
-      title,
-      description,
-      category,
-      file,
-    });
+    dispatch(createProject(formData));
+    setIsLoading(true);
+    setHeaderText("جاري التحويل الي صفحة المشاريع...");
   };
 
   return (
@@ -59,8 +70,9 @@ const CreateProject = () => {
       <ToastContainer closeButton position="bottom-right" theme="colored" />
       <div>
         <h1 className="text-3xl text-primary font-bold pb-6 lg:py-10">
-          إنشاء مشروع جديد
+          {headerText}
         </h1>
+
         <form className="flex flex-col gap-6" onSubmit={formSubmitHandler}>
           <Input
             variant="bordered"
@@ -80,9 +92,13 @@ const CreateProject = () => {
             onChange={(e) => setCategory(e.target.value)}
           >
             {categories.map((category) => (
-              <SelectItem key={category.id}>{category.content}</SelectItem>
+              <SelectItem key={category.title} value={category.title}>
+                {category.title}
+              </SelectItem>
             ))}
           </Select>
+
+
 
           <Textarea
             label="تفاصيل المشروع"
@@ -105,7 +121,34 @@ const CreateProject = () => {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
 
-          <Button type="submit" color="secondary" variant="shadow">
+          <Button
+            type="submit"
+            color="primary"
+            variant="shadow"
+            isLoading={loading}
+            spinner={
+              <svg
+                className="animate-spin h-5 w-5 text-current"
+                fill="none"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  fill="currentColor"
+                />
+              </svg>
+            }
+          >
             نشر المشروع
           </Button>
         </form>
