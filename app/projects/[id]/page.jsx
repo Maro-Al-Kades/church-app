@@ -22,7 +22,7 @@ const ProjectDetails = () => {
 
       <ProjectsDetailsProfile id={id} />
 
-      <CommentsWrapper />
+      <CommentsWrapper commentId={id} />
     </section>
   );
 };

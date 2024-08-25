@@ -4,7 +4,7 @@ import OtherComments from "./OtherComments";
 import { useSelector } from "react-redux";
 import AddCommentModal from "@/components/modals/AddCommentModal";
 
-const CommentsWrapper = () => {
+const CommentsWrapper = ({commentId}) => {
   const { project } = useSelector((state) => state.project);
 
   return (
@@ -20,7 +20,7 @@ const CommentsWrapper = () => {
         </div>
 
         <div>
-          <AddCommentModal />
+          <AddCommentModal projectId={project?._id} />
         </div>
       </div>
 
@@ -28,7 +28,7 @@ const CommentsWrapper = () => {
         <div className="my-8 flex flex-col gap-6">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col gap-y-6 w-full">
-              <OtherComments comments={project?.comments} />
+              <OtherComments comments={project?.comments} commentId={commentId} />
             </div>
           </div>
         </div>

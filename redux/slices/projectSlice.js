@@ -53,6 +53,28 @@ const projectSlice = createSlice({
     deleteProject(state, action) {
       state.projects = state.projects.filter((p) => p._id !== action.payload);
     },
+    addCommentToProject(state, action) {
+      state.project.comments.push(action.payload);
+    },
+    updateCommentProject(state, action) {
+      const updatedComments = state.project.comments.map((comment) =>
+        comment._id === action.payload._id ? { ...action.payload } : comment
+      );
+      state.project = {
+        ...state.project,
+        comments: updatedComments, // تغيير المرجع
+      };
+    },
+
+    deleteCommentProject(state, action) {
+      const comment = state.project.comments.find(
+        (c) => c._id === action.payload
+      );
+
+      const commentIndex = state.project.comments.indexOf(comment);
+
+      state.project.comments.splice(commentIndex, 1);
+    },
   },
 });
 

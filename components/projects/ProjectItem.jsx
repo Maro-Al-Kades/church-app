@@ -82,7 +82,7 @@ const ProjectItem = ({ project }) => {
             </p>
           </Skeleton>
         ) : (
-          <p className="mt-2 text-sm text-right flex items-start justify-start text-gray-300">
+          <p className="mt-2 text-sm text-right flex items-start justify-start dark:text-gray-300">
             {project.description}
           </p>
         )}

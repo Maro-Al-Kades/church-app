@@ -10,7 +10,7 @@ export function getUserProfile(userId) {
       const { data } = await request.get(`/api/users/profile/${userId}`);
       dispatch(profileActions.setProfile(data));
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message);
     }
   };
 }
@@ -40,7 +40,7 @@ export function uploadProfilePhoto(newPhoto) {
 
       localStorage.setItem("userInfo", JSON.stringify(user));
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message);
     }
   };
 }
@@ -67,7 +67,64 @@ export function updateProfile(userId, profile) {
       user.username = data?.username;
       localStorage.setItem("userInfo", JSON.stringify(user));
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message);
+    }
+  };
+}
+
+//~ Delete profile (Account)
+export function deleteProfile(userId) {
+  return async (dispatch, getState) => {
+    try {
+      dispatch(profileActions.setLoading());
+      await request.delete(`/api/users/profile/${userId}`, {
+        headers: {
+          Authorization: "Bearer " + getState().auth.user.token,
+        },
+      });
+
+      dispatch(profileActions.setIsProfileDeleted());
+      toast.success(`تم حذف الحساب بنجاح`);
+
+      setTimeout(() => dispatch(profileActions.clearIsProfileDeleted()), 2000);
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+      dispatch(profileActions.clearLoading());
+    }
+  };
+}
+
+//~ Get Users Count [for admin dashboard]
+export function getUsersCount() {
+  return async (dispatch, getState) => {
+    try {
+      const { data } = await request.get(`/api/users/count`, {
+        headers: {
+          Authorization: "Bearer " + getState().auth.user.token,
+        },
+      });
+
+      console.log("Users Count:", data.count); // عرض البيانات للتحقق
+      dispatch(profileActions.setUsersCount(data.count)); // تمرير العدد بشكل صحيح
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+    }
+  };
+}
+
+//~ get all users profiles
+export function getAllUsersProfiles() {
+  return async (dispatch, getState) => {
+    try {
+      const { data } = await request.get(`/api/users/profiles`, {
+        headers: {
+          Authorization: "Bearer " + getState().auth.user.token,
+        },
+      });
+
+      dispatch(profileActions.setProfiles(data)); // التأكد من تمرير البيانات إلى الحالة
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
     }
   };
 }

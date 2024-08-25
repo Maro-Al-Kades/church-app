@@ -94,7 +94,6 @@ const Login = () => {
               <span className="text-primary">اعادة التعيين</span>
             </p>
           </div>
-          <span className="text-secondary">تسجيل الدخول بواسطة الادمن</span>
         </form>
       </div>
       <div

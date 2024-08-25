@@ -21,16 +21,19 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { SearchIcon, ChurchLogo } from "@/components/icons";
 import { IoMdLogIn, IoMdPersonAdd } from "react-icons/io";
 import UserProfileIcon from "./UserProfileIcon";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 import { useSelector } from "react-redux";
+import { CiBurger, CiMenuBurger } from "react-icons/ci";
+import { FaClosedCaptioning } from "react-icons/fa";
+import { IoClose, IoMenuSharp } from "react-icons/io5";
 
 export const Navbar = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
-  // Use useMemo to avoid adding the admin nav item multiple times
   const navItems = useMemo(() => {
     const items = [...siteConfig.navItems];
     if (user?.isAdmin) {
@@ -68,107 +71,195 @@ export const Navbar = () => {
   );
 
   return (
-    <NextUINavbar
-      maxWidth="2xl"
-      position="sticky"
-      data-aos="fade-down"
-      data-aos-duration="2000"
-    >
-      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink
-            className="flex justify-start items-center gap-1"
-            href="/"
-            passHref
-          >
-            <ChurchLogo />
-            <p className="font-bold text-inherit text-primary text-xl">
-              مهرجان الكرازة
-            </p>
-          </NextLink>
-        </NavbarBrand>
-        <NavbarItem className="hidden sm:flex gap-2">
-          <ThemeSwitch />
-        </NavbarItem>
-      </NavbarContent>
+    <>
+      <NextUINavbar
+        maxWidth="2xl"
+        position="sticky"
+        data-aos="fade-down"
+        data-aos-duration="2000"
+      >
+        <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+          <NavbarBrand as="li" className="gap-3 max-w-fit">
+            <NextLink
+              className="flex justify-start items-center gap-1"
+              href="/"
+              passHref
+            >
+              <ChurchLogo />
+              <p className="font-bold text-inherit text-primary text-xl">
+                مهرجان الكرازة
+              </p>
+            </NextLink>
+          </NavbarBrand>
+          <NavbarItem className="flex gap-2">
+            <ThemeSwitch />
+          </NavbarItem>
+        </NavbarContent>
 
-      <NavbarContent className="basis-1/5 sm:basis-full" justify="center">
-        <ul className="hidden lg:flex gap-10 justify-start ml-2">
-          {navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <NextLink href={item.href} passHref legacyBehavior>
-                <Link
-                  className={clsx(
-                    linkStyles({ color: "foreground" }),
-                    "data-[active=true]:text-primary data-[active=true]:font-medium"
-                  )}
-                  color="foreground"
+        <NavbarContent className="basis-1/5 sm:basis-full" justify="center">
+          <ul className="hidden lg:flex gap-10 justify-start ml-2">
+            {navItems.map((item) => (
+              <NavbarItem key={item.href}>
+                <NextLink href={item.href} passHref legacyBehavior>
+                  <Link
+                    className={clsx(
+                      linkStyles({ color: "foreground" }),
+                      "data-[active=true]:text-primary data-[active=true]:font-medium"
+                    )}
+                    color="foreground"
+                  >
+                    {item.label}
+                    {item.icon}
+                  </Link>
+                </NextLink>
+              </NavbarItem>
+            ))}
+          </ul>
+        </NavbarContent>
+
+        <NavbarContent
+          className="hidden lg:flex basis-1/5 lg:basis-full"
+          justify="end"
+        >
+          {user ? (
+            <UserProfileIcon user={user} />
+          ) : (
+            <NavbarItem className="hidden md:flex md:gap-3">
+              <NextLink href="/auth/register" passHref legacyBehavior>
+                <Button
+                  as="a"
+                  className="text-sm font-normal text-default-600"
+                  endContent={<IoMdPersonAdd size={20} />}
+                  variant="bordered"
+                  color="primary"
                 >
-                  {item.label}
-                  {item.icon}
-                </Link>
+                  تسجيل حساب جديد
+                </Button>
+              </NextLink>
+              <NextLink href="/auth/login" passHref legacyBehavior>
+                <Button
+                  as="a"
+                  className="text-sm font-normal text-default-600"
+                  endContent={<IoMdLogIn size={20} />}
+                  variant="flat"
+                  color="secondary"
+                >
+                  تسجيل الدخول
+                </Button>
               </NextLink>
             </NavbarItem>
-          ))}
-        </ul>
-      </NavbarContent>
+          )}
+        </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
-        {user ? (
-          <UserProfileIcon user={user} />
-        ) : (
-          <NavbarItem className="hidden md:flex md:gap-3">
-            <NextLink href="/auth/register" passHref legacyBehavior>
-              <Button
-                as="a"
-                className="text-sm font-normal text-default-600"
-                endContent={<IoMdPersonAdd size={20} />}
-                variant="bordered"
-                color="primary"
-              >
-                تسجيل حساب جديد
-              </Button>
-            </NextLink>
-            <NextLink href="/auth/login" passHref legacyBehavior>
-              <Button
-                as="a"
-                className="text-sm font-normal text-default-600"
-                endContent={<IoMdLogIn size={20} />}
-                variant="flat"
-                color="secondary"
-              >
-                تسجيل الدخول
-              </Button>
-            </NextLink>
+        <NavbarContent className="basis-1/5 sm:basis-full" justify="end">
+          <NavbarItem className="flex items-center justify-end lg:hidden">
+            <Button
+              auto
+              light
+              isIconOnly
+              onClick={() => setIsSidebarOpen(true)}
+              color="primary"
+              variant="flat"
+            >
+              <IoMenuSharp />
+            </Button>
           </NavbarItem>
-        )}
-      </NavbarContent>
+        </NavbarContent>
 
-      <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item.label}-${index}`}>
-              <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                    ? "danger"
-                    : "foreground"
-                }
-                href={item.href}
-                size="lg"
-              >
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          ))}
+        <NavbarMenu>
+          {searchInput}
+          <div className="mx-4 mt-2 flex flex-col gap-2">
+            {siteConfig.navMenuItems.map((item, index) => (
+              <NavbarMenuItem key={`${item.label}-${index}`}>
+                <Link
+                  color={
+                    index === 2
+                      ? "primary"
+                      : index === siteConfig.navMenuItems.length - 1
+                      ? "danger"
+                      : "foreground"
+                  }
+                  href={item.href}
+                  size="lg"
+                >
+                  {item.label}
+                </Link>
+              </NavbarMenuItem>
+            ))}
+          </div>
+        </NavbarMenu>
+      </NextUINavbar>
+
+      {/* Sidebar */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 bg-white dark:bg-black z-50 p-4">
+          <Button
+            className="absolute top-4 left-4 text-gray-600 dark:text-gray-300"
+            onClick={() => setIsSidebarOpen(false)}
+            isIconOnly
+            color="primary"
+            variant="flat"
+          >
+            <IoClose size={20} />
+          </Button>
+          <div className="flex flex-col h-full">
+            <div className="flex items-center mb-4">
+              <NextLink href="/" passHref>
+                <ChurchLogo />
+              </NextLink>
+              <p className="font-bold text-primary text-xl ml-2">
+                مهرجان الكرازة
+              </p>
+            </div>
+            {user ? (
+              <UserProfileIcon user={user} />
+            ) : (
+              <div className="flex flex-col gap-2">
+                <NextLink href="/auth/register" passHref legacyBehavior>
+                  <Button
+                    as="a"
+                    className="text-sm font-normal text-default-600"
+                    endContent={<IoMdPersonAdd size={20} />}
+                    variant="bordered"
+                    color="primary"
+                  >
+                    تسجيل حساب جديد
+                  </Button>
+                </NextLink>
+                <NextLink href="/auth/login" passHref legacyBehavior>
+                  <Button
+                    as="a"
+                    className="text-sm font-normal text-default-600"
+                    endContent={<IoMdLogIn size={20} />}
+                    variant="flat"
+                    color="secondary"
+                  >
+                    تسجيل الدخول
+                  </Button>
+                </NextLink>
+              </div>
+            )}
+            <ul className="mt-4 flex flex-col gap-2">
+              {navItems.map((item) => (
+                <li key={item.href}>
+                  <NextLink href={item.href} passHref>
+                    <Link
+                      className={clsx(
+                        linkStyles({ color: "foreground" }),
+                        "block py-2 px-4 text-lg font-medium"
+                      )}
+                      color="foreground"
+                    >
+                      {item.label}
+                      {item.icon}
+                    </Link>
+                  </NextLink>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </NavbarMenu>
-    </NextUINavbar>
+      )}
+    </>
   );
 };

@@ -90,10 +90,13 @@ const EditProjectModal = () => {
       updateProject({ title, category, description }, project?._id)
     );
     if (response && response.success) {
-      dispatch(fetchSingleProject(id)); // Fetch the updated project data
+      dispatch(fetchSingleProject(project?._id)); // Fetch the updated project data
+    }
+    setTimeout(() => {
+      dispatch(fetchSingleProject(project?._id)); // Fetch the updated project data
       toast.success("تم تحديث المشروع بنجاح");
       onOpenChange(false); // Close the modal
-    }
+    }, 100);
   };
 
   return (

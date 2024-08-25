@@ -13,10 +13,13 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Head from "next/head";
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const { profile } = useSelector((state) => state.profile);
+  const { profile, loading, isProfileDeleted } = useSelector(
+    (state) => state.profile
+  );
   const params = useParams();
   const { id } = params || {};
 
@@ -35,15 +38,25 @@ const Profile = () => {
   }
 
   return (
-    <section className="flex flex-col">
-      <ToastContainer position="top-center" theme="dark" />
+    <>
+      <Head>
+        <title>الصفحة الشخصية</title>
+      </Head>
 
-      <ProfileHeader profile={profile} />
+      <section className="flex flex-col">
+        <ToastContainer position="top-center" theme="dark" />
 
-      <ProfileComments profile={profile} />
+        <ProfileHeader
+          profile={profile}
+          loading={loading}
+          isProfileDeleted={isProfileDeleted}
+        />
 
-      <ProfileProjects profile={profile} />
-    </section>
+        <ProfileComments profile={profile} />
+
+        <ProfileProjects profile={profile} />
+      </section>
+    </>
   );
 };
 

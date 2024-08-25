@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -15,23 +15,28 @@ import {
 import { FaRegEye } from "react-icons/fa";
 import { CiTrash } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
+import { deleteProfile, getAllUsersProfiles } from "@/redux/api/profileApiCall";
 import { GiBackForth } from "react-icons/gi";
 import Link from "next/link";
 import { Pagination } from "@nextui-org/pagination";
-import { deleteProject, getAllProjects } from "@/redux/api/projectApiCall";
 import AOS from "aos";
 
+const statusColorMap = {
+  active: "success",
+  paused: "warning",
+  vacation: "warning",
+};
+
 const columns = [
-  { name: "اسم المشروع", uid: "username" },
-  { name: "الناشر", uid: "role" },
-  { name: "القسم", uid: "status" },
+  { name: "الاسم", uid: "username" },
+  { name: "الصلاحية", uid: "role" },
+  { name: "التوثيق", uid: "status" },
   { name: "التعديلات", uid: "actions" },
 ];
 
-export default function AdminProjects() {
+export default function App() {
   const dispatch = useDispatch();
-  const { projects } = useSelector((state) => state.project);
-
+  const { profiles, isProfileDeleted } = useSelector((state) => state.profile);
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
@@ -39,20 +44,23 @@ export default function AdminProjects() {
     AOS.init({ duration: 800 });
     window.scrollTo(0, 0);
 
-    dispatch(getAllProjects());
-  }, [dispatch]);
+    dispatch(getAllUsersProfiles());
+  }, [isProfileDeleted]);
 
   const pages =
-    projects?.length > 0 ? Math.ceil(projects?.length / rowsPerPage) : 0;
+    profiles?.users?.length > 0
+      ? Math.ceil(profiles.users?.length / rowsPerPage)
+      : 0;
 
-  // Filtered projects for current page
-  const paginatedProjects = projects?.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return profiles?.users?.slice(start, end) || [];
+  }, [page, profiles]);
 
-  const deleteProjectHandler = (projectId) => {
-    dispatch(deleteProject(projectId));
+  // Delete User Handler
+  const deleteUserHandler = (userId) => {
+    dispatch(deleteProfile(userId));
   };
 
   return (
@@ -84,33 +92,29 @@ export default function AdminProjects() {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={paginatedProjects}>
+        <TableBody items={items}>
           {(item) => (
             <TableRow key={item?._id}>
               <TableCell>
                 <User
-                  avatarProps={{ radius: "lg", src: item?.image?.url }}
+                  avatarProps={{ radius: "lg", src: item?.profilePhoto?.url }}
                   description={item?.email}
-                  name={item?.title}
+                  name={item?.username}
                 />
               </TableCell>
-              <TableCell>
-                <User
-                  avatarProps={{
-                    radius: "lg",
-                    src: item?.user?.profilePhoto?.url,
-                  }}
-                  name={item?.user?.username}
-                />
-              </TableCell>
+              <TableCell>{item?.isAdmin ? "ادمن" : "مستخدم"}</TableCell>
               <TableCell>
                 <Chip
                   className="capitalize"
-                  size="md"
-                  color="primary"
+                  color={
+                    item?.isAccountVerified
+                      ? statusColorMap.active
+                      : statusColorMap.paused
+                  }
+                  size="sm"
                   variant="flat"
                 >
-                  {item?.category}
+                  {item?.isAccountVerified ? "تم التوثيق" : "غير موثق"}
                 </Chip>
               </TableCell>
               <TableCell>
@@ -119,19 +123,19 @@ export default function AdminProjects() {
                     endContent={<FaRegEye size={18} />}
                     size="sm"
                     as={Link}
-                    href={`/projects/${item?._id}`}
+                    href={`/profile/${item?._id}`}
                     target="_blank"
                   >
-                    مشاهدة المشروع
+                    الملف الشخصي
                   </Button>
                   <Button
                     endContent={<CiTrash size={18} />}
                     color="danger"
                     variant="flat"
                     size="sm"
-                    onClick={() => deleteProjectHandler(item?._id)}
+                    onClick={() => deleteUserHandler(item?._id)}
                   >
-                    حذف المشروع
+                    حذف المستخدم
                   </Button>
                 </div>
               </TableCell>

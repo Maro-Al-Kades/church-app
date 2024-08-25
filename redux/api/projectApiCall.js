@@ -1,5 +1,3 @@
-// redux/api/projectApiCall.js
-
 import { projectActions } from "@/redux/slices/projectSlice";
 import { toast } from "react-toastify";
 import request from "@/utils/request";
@@ -23,6 +21,20 @@ export function fetchProjects(pageNumber) {
   };
 }
 
+// Fetch All Projects
+export function getAllProjects() {
+  return async (dispatch) => {
+    try {
+      const { data } = await request.get(`/api/projects`);
+      dispatch(projectActions.setProjects(data));
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "حدث خطأ";
+      toast.error(errorMessage);
+    }
+  };
+}
+
+// Fetch All Categories
 export function fetchCategories() {
   return async (dispatch) => {
     dispatch(projectActions.setLoading(true));
@@ -39,6 +51,7 @@ export function fetchCategories() {
   };
 }
 
+// Get Projects Count
 export function getProjectsCount() {
   return async (dispatch) => {
     dispatch(projectActions.setLoading(true));
@@ -72,6 +85,7 @@ export function fetchProjectsBasedOnCategory(categoryId) {
   };
 }
 
+// Create New Project
 export function createProject(newProject) {
   return async (dispatch, getState) => {
     try {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Avatar, Button, Input, Textarea } from "@nextui-org/react";
+import { Avatar, Button, Input, Spinner, Textarea } from "@nextui-org/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import {
   Modal,
@@ -13,6 +13,7 @@ import {
 } from "@nextui-org/modal";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteProfile,
   getUserProfile,
   updateProfile,
   uploadProfilePhoto,
@@ -21,9 +22,18 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { logoutUser } from "@/redux/api/authApiCall";
+import { useRouter } from "next/navigation";
 
-const ProfileHeader = ({ profile }) => {
+const ProfileHeader = () => {
+  const router = useRouter();
   const dispatch = useDispatch();
+
+  const { profile, loading, isProfileDeleted } = useSelector(
+    (state) => state.profile
+  );
+
+  const { user } = useSelector((state) => state.auth);
 
   const [file, setFile] = useState(null);
   const [username, setUsername] = useState("");
@@ -64,6 +74,14 @@ const ProfileHeader = ({ profile }) => {
       updatedProfile.password = password;
     }
 
+    if (loading) {
+      return (
+        <div className="text-primary text-3xl font-bold flex w-full mx-auto items-center justify-center">
+          <Spinner color="primary" title="جاري التحويل للصفحة الرئيسية..." />
+        </div>
+      );
+    }
+
     try {
       await dispatch(updateProfile(profile?._id, updatedProfile));
       dispatch(getUserProfile(profile?._id)); // Fetch updated profile data
@@ -72,6 +90,18 @@ const ProfileHeader = ({ profile }) => {
       toast.error("حدث خطأ أثناء تحديث الملف الشخصي");
     }
   };
+
+  const deleteAccountHandler = () => {
+    dispatch(deleteProfile(user?._id));
+    toast.success("تم حذف الحساب بنجاح");
+    dispatch(logoutUser());
+  };
+
+  useEffect(() => {
+    if (isProfileDeleted) {
+      router.push("/");
+    }
+  }, [router, isProfileDeleted]);
 
   return (
     <>
@@ -102,134 +132,136 @@ const ProfileHeader = ({ profile }) => {
           </div>
         </div>
 
-        <div>
-          <Button
-            color="warning"
-            variant="bordered"
-            endContent={<MdEdit />}
-            onPress={onEditOpen}
-          >
-            تعديل الملف الشخصي
-          </Button>
+        {profile?._id === user?._id && (
+          <div>
+            <Button
+              color="warning"
+              variant="bordered"
+              endContent={<MdEdit />}
+              onPress={onEditOpen}
+            >
+              تعديل الملف الشخصي
+            </Button>
 
-          <Modal
-            isOpen={isEditOpen}
-            onOpenChange={onEditClose}
-            placement="top-center"
-            size="4xl"
-            shadow="lg"
-            backdrop="blur"
-            className="p-3"
-          >
-            <ModalContent>
-              <ModalHeader className="flex flex-row justify-between items-center">
-                تعديل الملف الشخصي
-                <Button
-                  className="ml-10"
-                  color="danger"
-                  variant="shadow"
-                  endContent={<MdDelete size={20} />}
-                  onPress={onDeleteOpen}
-                >
-                  حذف الحساب
-                </Button>
-              </ModalHeader>
-              <ModalBody>
-                <div className="my-4 flex flex-col md:flex-row justify-between items-center">
-                  <div>
-                    <Avatar
-                      src={
-                        file
-                          ? URL.createObjectURL(file)
-                          : profile?.profilePhoto?.url
-                      }
-                      size="lg"
-                      className="w-[70px] h-[70px] mt-2"
-                      isBordered
-                      color="primary"
-                    />
+            <Modal
+              isOpen={isEditOpen}
+              onOpenChange={onEditClose}
+              placement="top-center"
+              size="4xl"
+              shadow="lg"
+              backdrop="blur"
+              className="p-3"
+            >
+              <ModalContent>
+                <ModalHeader className="flex flex-row justify-between items-center">
+                  تعديل الملف الشخصي
+                  <Button
+                    className="ml-10"
+                    color="danger"
+                    variant="shadow"
+                    endContent={<MdDelete size={20} />}
+                    onPress={onDeleteOpen}
+                  >
+                    حذف الحساب
+                  </Button>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="my-4 flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                      <Avatar
+                        src={
+                          file
+                            ? URL.createObjectURL(file)
+                            : profile?.profilePhoto?.url
+                        }
+                        size="lg"
+                        className="w-[70px] h-[70px] mt-2"
+                        isBordered
+                        color="primary"
+                      />
+                    </div>
+                    <form>
+                      <Button
+                        color="primary"
+                        variant="bordered"
+                        className="mr-2 w-[250px]"
+                        onPress={() =>
+                          document.getElementById("image-upload").click()
+                        }
+                      >
+                        تغيير صورة الملف الشخصي
+                      </Button>
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        onChange={(e) => {
+                          setFile(e.target.files[0]);
+                          const formData = new FormData();
+                          formData.append("image", e.target.files[0]);
+                          dispatch(uploadProfilePhoto(formData));
+                        }}
+                        style={{ display: "none" }}
+                      />
+                    </form>
                   </div>
-                  <form>
-                    <Button
-                      color="primary"
-                      variant="bordered"
-                      className="mr-2 w-[250px]"
-                      onPress={() =>
-                        document.getElementById("image-upload").click()
-                      }
-                    >
-                      تغيير صورة الملف الشخصي
-                    </Button>
-                    <input
-                      type="file"
-                      id="image-upload"
-                      accept="image/*"
-                      onChange={(e) => {
-                        setFile(e.target.files[0]);
-                        const formData = new FormData();
-                        formData.append("image", e.target.files[0]);
-                        dispatch(uploadProfilePhoto(formData));
-                      }}
-                      style={{ display: "none" }}
+                  <form
+                    onSubmit={formSubmitHandler}
+                    className="flex flex-col items-center justify-between gap-y-4"
+                  >
+                    <Input
+                      label="الاسم"
+                      placeholder="اكتب الاسم الصحيح"
+                      variant="flat"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
+
+                    <Textarea
+                      label="النبذة الشخصية"
+                      placeholder="اكتب النبذة الشخصية عنك"
+                      type="text"
+                      variant="flat"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                    />
+
+                    <Input
+                      label="كلمة المرور"
+                      placeholder="تغيير كلمة المرور"
+                      variant="flat"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pb-6"
+                    />
+
+                    <div className="flex flex-row items-center justify-between gap-4 w-full">
+                      <Button
+                        fullWidth
+                        color="primary"
+                        variant="flat"
+                        type="submit"
+                        onPress={onEditClose}
+                      >
+                        تأكيد البيانات
+                      </Button>
+                      <Button
+                        fullWidth
+                        color="primary"
+                        variant="flat"
+                        onPress={onEditClose}
+                      >
+                        الغاء
+                      </Button>
+                    </div>
                   </form>
-                </div>
-                <form
-                  onSubmit={formSubmitHandler}
-                  className="flex flex-col items-center justify-between gap-y-4"
-                >
-                  <Input
-                    label="الاسم"
-                    placeholder="اكتب الاسم الصحيح"
-                    variant="flat"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-
-                  <Textarea
-                    label="النبذة الشخصية"
-                    placeholder="اكتب النبذة الشخصية عنك"
-                    type="text"
-                    variant="flat"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                  />
-
-                  <Input
-                    label="كلمة المرور"
-                    placeholder="تغيير كلمة المرور"
-                    variant="flat"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pb-6"
-                  />
-
-                  <div className="flex flex-row items-center justify-between gap-4 w-full">
-                    <Button
-                      fullWidth
-                      color="primary"
-                      variant="flat"
-                      type="submit"
-                      onPress={onEditClose}
-                    >
-                      تأكيد البيانات
-                    </Button>
-                    <Button
-                      fullWidth
-                      color="primary"
-                      variant="flat"
-                      onPress={onEditClose}
-                    >
-                      الغاء
-                    </Button>
-                  </div>
-                </form>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-        </div>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+          </div>
+        )}
       </div>
 
       <Modal
@@ -252,10 +284,8 @@ const ProfileHeader = ({ profile }) => {
             <Button
               color="danger"
               onPress={() => {
-                // إضافة منطق الحذف هنا
-                // تأكد من التعامل مع العملية بشكل صحيح
-                // وبعد الانتهاء من الحذف أغلق الـ Modal
-                onDeleteClose();
+                deleteAccountHandler(); // استدعاء دالة حذف الحساب
+                onDeleteClose(); // إغلاق المودال بعد حذف الحساب
               }}
             >
               حذف الحساب

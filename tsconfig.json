@@ -33,7 +33,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "constants/index.js"  ],
+, "constants/index.js", "app/admin/users/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]
