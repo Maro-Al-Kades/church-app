@@ -7,10 +7,26 @@ import Link from "next/link";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllCategories } from "@/redux/api/categoryApiCall";
+import { getUsersCount } from "@/redux/api/profileApiCall";
+import { getProjectsCount } from "@/redux/api/projectApiCall";
+import { fetchAllComments } from "@/redux/api/commentApiCall";
 
 const Hero = () => {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.category);
+  const { usersCount } = useSelector((state) => state.profile);
+  const { projectsCount } = useSelector((state) => state.project);
+  const { comments } = useSelector((state) => state.comment);
+
   useEffect(() => {
     AOS.init({ duration: 800 });
+
+    dispatch(fetchAllCategories());
+    dispatch(getUsersCount());
+    dispatch(getProjectsCount());
+    dispatch(fetchAllComments());
   }, []);
 
   return (
@@ -65,20 +81,28 @@ const Hero = () => {
 
           <div className="flex flex-row gap-6 w-full justify-between">
             <div className="text-center flex-1">
-              <div className="text-2xl md:text-4xl font-bold">120</div>
-              <div className="text-gray-600">فعاليات</div>
+              <div className="text-2xl md:text-4xl font-bold">
+                {projectsCount}
+              </div>
+              <div className="text-gray-600">مشروع</div>
             </div>
             <div className="text-center flex-1">
-              <div className="text-2xl md:text-4xl font-bold">35</div>
-              <div className="text-gray-600">محاضرة</div>
+              <div className="text-2xl md:text-4xl font-bold">
+                {usersCount}
+              </div>
+              <div className="text-gray-600">مستخدم</div>
             </div>
             <div className="text-center flex-1">
-              <div className="text-2xl md:text-4xl font-bold">50</div>
-              <div className="text-gray-600">عرض</div>
+              <div className="text-2xl md:text-4xl font-bold">
+                {categories?.length}
+              </div>
+              <div className="text-gray-600">قسم</div>
             </div>
             <div className="text-center flex-1">
-              <div className="text-2xl md:text-4xl font-bold">50</div>
-              <div className="text-gray-600">عرض</div>
+              <div className="text-2xl md:text-4xl font-bold">
+                {comments?.length}
+              </div>
+              <div className="text-gray-600">تعليق</div>
             </div>
           </div>
         </div>
