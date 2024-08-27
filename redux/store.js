@@ -1,16 +1,27 @@
+"use client";
+
 import { configureStore } from "@reduxjs/toolkit";
+import { useEffect, useState } from "react";
 import { authReducer } from "./slices/authSlice";
 import { profileReducer } from "./slices/profileSlice";
 import { projectReducer } from "./slices/projectSlice";
 import { categoryReducer } from "./slices/categorySlice";
 import { commentReducer } from "./slices/commentSlice";
 
-const storedUser = localStorage.getItem("userInfo");
-const initialState = {
+let preloadedState = {
   auth: {
-    user: storedUser ? JSON.parse(storedUser) : null,
+    user: null,
   },
 };
+
+if (typeof window !== "undefined") {
+  const storedUser = localStorage.getItem("userInfo");
+  preloadedState = {
+    auth: {
+      user: storedUser ? JSON.parse(storedUser) : null,
+    },
+  };
+}
 
 const store = configureStore({
   reducer: {
@@ -20,7 +31,7 @@ const store = configureStore({
     category: categoryReducer,
     comment: commentReducer,
   },
-  preloadedState: initialState,
+  preloadedState,
 });
 
 export default store;
