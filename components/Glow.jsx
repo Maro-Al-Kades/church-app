@@ -5,7 +5,7 @@ const Glow = ({ className }) => {
   return (
     <div
       className={clsx(
-        "absolute animate-pulse  w-[400px] h-[400px] blur-3xl bg-primary/40 rounded-full",
+        "lg:absolute lg:animate-pulse lg:w-[400px] lg:h-[400px] lg:blur-3xl lg:bg-primary/40 lg:rounded-full",
         className
       )}
     />
